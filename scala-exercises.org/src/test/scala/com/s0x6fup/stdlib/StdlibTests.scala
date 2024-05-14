@@ -4,6 +4,7 @@ import org.scalatest._
 import wordspec._
 import matchers._
 import com.s0x6fup.stdlib._
+import java.util.Date
 
 class StdlibTestsSpec extends AnyWordSpec with should.Matchers {
   // some filler test to confirm that it compiles
@@ -107,6 +108,40 @@ class StdlibTestsSpec extends AnyWordSpec with should.Matchers {
 
       Person.showMeInnerSecret(clark) should be("Superman")
       Person.showMeInnerSecret(peter) should be("Spider-Man")
+    }
+  }
+
+  "std lib tuples" should {
+    "simple tuple demonstration" in {
+      val tuple = ("apple", "dog")
+      val fruit = tuple._1
+      val animal = tuple._2
+
+      fruit should be("apple")
+      animal should be("dog")
+    }
+
+    "tuples with mixed types" in {
+      val tuple5 = ("a", 1, 2.2, new Date(), "five")
+
+      tuple5._2 should be(1)
+      tuple5._5 should be("five")
+    }
+
+    "multiple variables from a tuple" in {
+      val student = ("Sean Rogers", 21, 3.5)
+      val (name, age, gpa) = student
+
+      name should be("Sean Rogers")
+      age should be(21)
+      gpa should be(3.5)
+    }
+
+    "swapping elements of tuple with 2 elements using swap method" in {
+      val tuple = ("apple", 3).swap
+
+      tuple._1 should be(3)
+      tuple._2 should be("apple")
     }
   }
 }

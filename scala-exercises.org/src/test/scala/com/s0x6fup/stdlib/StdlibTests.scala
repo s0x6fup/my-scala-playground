@@ -1,11 +1,11 @@
-package com.s0x6fup
+package com.s0x6fup.stdlib
 
 import org.scalatest._
 import wordspec._
 import matchers._
-import com.s0x6fup.Classes.ClassWithValParameter
+import com.s0x6fup.stdlib._
 
-class AllTestsSpec extends AnyWordSpec with should.Matchers {
+class StdlibTestsSpec extends AnyWordSpec with should.Matchers {
   // some filler test to confirm that it compiles
   "std lib asserts" should {
     "true is always true" in {
@@ -24,7 +24,7 @@ class AllTestsSpec extends AnyWordSpec with should.Matchers {
 
   "std lib classes" should {
     "true is always true" in {
-      val aClass = new ClassWithValParameter("Gandalf")
+      val aClass = new Classes.ClassWithValParameter("Gandalf")
       aClass.name should be("Gandalf")
     }
   }
@@ -90,6 +90,23 @@ class AllTestsSpec extends AnyWordSpec with should.Matchers {
 
       result1 should be(9)
       result2 should be(1)
+    }
+  }
+
+  "std lib objects" should {
+    "best move of 1932" in {
+
+      Movie.academyAwardBestMoviesForYear(1932).get.name should be(
+        "Grand Hotel"
+      )
+    }
+
+    "accessing private values using companion object" in {
+      val clark = new Person("Clark Kent", "Superman")
+      val peter = new Person("Peter Parker", "Spider-Man")
+
+      Person.showMeInnerSecret(clark) should be("Superman")
+      Person.showMeInnerSecret(peter) should be("Spider-Man")
     }
   }
 }

@@ -1,5 +1,5 @@
-package com.s0x6fup
+package com.s0x6fup.stdlib
 
-object Classes extends App {
+object Classes {
   class ClassWithValParameter(val name: String)
 }

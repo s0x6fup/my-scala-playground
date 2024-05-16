@@ -5,6 +5,9 @@ import wordspec._
 import matchers._
 import com.s0x6fup.stdlib._
 import java.util.Date
+import com.s0x6fup.stdlib.HigherOrderFunctions.addWithoutSyntaxSugar
+import scala.collection.immutable
+import com.s0x6fup.stdlib.HigherOrderFunctions.fiveAdder
 
 class StdlibTestsSpec extends AnyWordSpec with should.Matchers {
   // some filler test to confirm that it compiles
@@ -143,5 +146,89 @@ class StdlibTestsSpec extends AnyWordSpec with should.Matchers {
       tuple._1 should be(3)
       tuple._2 should be("apple")
     }
+  }
+
+  "std lib higher order functions" should {
+    "function literals" in {
+      def lambda = { x: Int => x + 1 }
+      def lambda2 = (x: Int) => x + 2
+      val lambda3 = (x: Int) => x + 3
+
+      val lambda4 = new Function1[Int, Int] {
+        def apply(v1: Int): Int = v1 - 1
+      }
+
+      def lambda5(x: Int) = x + 1
+
+      val result = lambda(3)
+      val result1andhalf = lambda.apply(3)
+
+      val result2 = lambda2(3)
+      val result3 = lambda3(3)
+      val result4 = lambda4(3)
+      val result5 = lambda5(3)
+
+      result should be(4)
+      result1andhalf should be(4)
+      result2 should be(5)
+      result3 should be(6)
+      result4 should be(2)
+      result5 should be(4)
+    }
+
+    "An anonymous function can also take on a different look by taking out the brackets" in {
+      def lambda = (x: Int) => x + 1
+      def result = lambda(5)
+      result should be(6)
+    }
+
+    "scala detects that i use variables outside of scope and creates an object instance to hold the variables" in {
+      var incrementer = 1
+
+      def closure = { x: Int => x + incrementer }
+
+      val result1 = closure(10)
+      result1 should be(
+        11
+      )
+
+      incrementer = 2
+
+      val result2 = closure(10)
+      result2 should be(
+        12
+      )
+    }
+
+    "higher order functions (functions that get funcs as args or return them)" in {
+      def summation(x: Int, y: Int => Int) = y(x)
+
+      var incrementer = 3
+      def closure = (x: Int) => x + incrementer
+
+      val result = summation(10, closure)
+      result should be(
+        13
+      )
+
+      incrementer = 4
+      val result2 = summation(10, closure)
+      result2 should be(
+        14
+      )
+    }
+
+    "higher order functions returning functions" in {
+      addWithoutSyntaxSugar(1).isInstanceOf[Function1[Int, Int]] should be(
+        true
+      ) // this proves that it is a function :)
+
+      addWithoutSyntaxSugar(2)(3) should be(
+        5
+      )
+
+      fiveAdder(5) should be(10)
+    }
+
   }
 }

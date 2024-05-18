@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Route.seal
 import scala.util.{Success, Failure}
+import com.stupidbird.routers._
 
 object StupidbirdService extends App {
   val host = "127.0.0.1"

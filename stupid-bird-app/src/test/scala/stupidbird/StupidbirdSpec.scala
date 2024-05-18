@@ -5,10 +5,11 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.Specs2RouteTest
 import akka.http.scaladsl.server._
 import Directives._
+import com.stupidbird.routers._
 
 class StupidbirdSpec extends Specification with Specs2RouteTest {
 
-  "The service" should {
+  "stupidbird service" should {
 
     "return a greeting for GET requests to the root path" in {
       Get("/test") ~> HealthRouter() ~> check {

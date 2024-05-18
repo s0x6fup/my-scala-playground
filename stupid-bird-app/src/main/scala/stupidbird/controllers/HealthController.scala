@@ -1,4 +1,4 @@
-package com.stupidbird
+package com.stupidbird.controllers
 
 import akka.http.scaladsl.server.Directives._
 import io.circe._

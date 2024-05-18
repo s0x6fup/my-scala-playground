@@ -1,6 +1,6 @@
 import Dependencies._
 
-ThisBuild / scalaVersion := "2.12.18"
+ThisBuild / scalaVersion := "2.12.19"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "com.stupidbird"
 ThisBuild / organizationName := "stupidbird"
@@ -22,6 +22,9 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-core" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
+      "org.scalikejdbc" %% "scalikejdbc" % "2.5.2",
+      "com.h2database" % "h2" % "2.2.224",
+      "ch.qos.logback" % "logback-classic" % "1.5.6",
       "org.specs2" %% "specs2-core" % specs2Version % Test
     )
   )

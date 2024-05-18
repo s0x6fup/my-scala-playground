@@ -7,7 +7,8 @@ case class User(
     username: String
 )
 
-object UsersModelInit {
+/*
+object User {
   def apply()(implicit test: String): Unit = {
     sql"""
 create table members (
@@ -18,3 +19,4 @@ create table members (
 """.execute.apply()
   }
 }
+ */

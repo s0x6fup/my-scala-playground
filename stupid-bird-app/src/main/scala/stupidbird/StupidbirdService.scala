@@ -10,10 +10,25 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Route.seal
 import scala.util.{Success, Failure}
 import com.stupidbird.routers._
+import scalikejdbc._
 
 object StupidbirdService extends App {
   val host = "127.0.0.1"
   val port = 9001
+  val databaseUrl = "jdbc:mysql://172.20.0.2:3306/stupidbird"
+  val databaseUser = "stupidbird_user"
+  val databasePassword = "myverysecretpassword123!"
+
+  Class.forName("org.h2.Driver")
+  ConnectionPool.singleton(
+    databaseUrl,
+    databaseUser,
+    databasePassword
+  )
+
+  implicit val dBsession: DBSession = AutoSession
+
+  val testvalone = withSQL { select("1") }.map(_ => _).single.apply()
 
   implicit val system: ActorSystem[Any] =
     ActorSystem(Behaviors.empty, "http-server-system")

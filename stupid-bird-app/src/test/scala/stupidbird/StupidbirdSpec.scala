@@ -6,7 +6,7 @@ import akka.http.scaladsl.testkit.Specs2RouteTest
 import akka.http.scaladsl.server._
 import Directives._
 import com.stupidbird.routers._
-import com.stupidbird.StupidbirdService.testvalone
+import com.stupidbird.StupidbirdService.resultTest
 
 class StupidbirdSpec extends Specification with Specs2RouteTest {
 
@@ -19,7 +19,7 @@ class StupidbirdSpec extends Specification with Specs2RouteTest {
     }
 
     "verify test sql works" in {
-      testvalone shouldEqual 1
+      resultTest must beSome(1)
     }
   }
 }

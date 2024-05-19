@@ -15,11 +15,11 @@ import scalikejdbc._
 object StupidbirdService extends App {
   val host = "127.0.0.1"
   val port = 9001
-  val databaseUrl = "jdbc:mysql://172.20.0.2:3306/stupidbird"
+  val databaseUrl = "jdbc:mysql://localhost:3306/stupidbird"
   val databaseUser = "stupidbird_user"
   val databasePassword = "myverysecretpassword123!"
 
-  Class.forName("org.h2.Driver")
+  Class.forName("com.mysql.jdbc.Driver")
   ConnectionPool.singleton(
     databaseUrl,
     databaseUser,
@@ -28,7 +28,10 @@ object StupidbirdService extends App {
 
   implicit val dBsession: DBSession = AutoSession
 
-  val testvalone = withSQL { select("1") }.map(_ => _).single.apply()
+  val resultTest: Option[Int] = DB.readOnly { implicit dBsession =>
+    sql"select 1".map(rs => rs.int(1)).single.apply()
+  }
+  println(resultTest)
 
   implicit val system: ActorSystem[Any] =
     ActorSystem(Behaviors.empty, "http-server-system")

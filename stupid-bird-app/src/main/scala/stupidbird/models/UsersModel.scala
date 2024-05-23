@@ -3,8 +3,11 @@ package com.stupidbird.models
 import scalikejdbc._
 
 case class User(
+    id: String,
     email: String,
-    username: String
+    username: String,
+    profilePictureUrl: String,
+    bio: Option[String]
 )
 
 /*

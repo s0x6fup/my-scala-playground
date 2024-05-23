@@ -1,5 +1,6 @@
 package com.stupidbird
 
+import scala.io.StdIn
 import akka.actor.typed.ActorSystem
 import scala.concurrent.ExecutionContext
 import akka.actor.typed.scaladsl.Behaviors
@@ -26,20 +27,34 @@ object StupidbirdService extends App {
     databasePassword
   )
 
-  implicit val dBsession: DBSession = AutoSession
+  implicit val dbSession: DBSession = AutoSession
 
-  val resultTest: Option[Int] = DB.readOnly { implicit dBsession =>
-    sql"select 1".map(rs => rs.int(1)).single.apply()
-  }
-  println(resultTest)
+  val `application/json` =
+    MediaType.applicationWithFixedCharset(
+      "application/json",
+      HttpCharsets.`UTF-8`
+    )
+  val contentType = ContentType.apply(`application/json`)
+
+  // // some tests i did to verify that i can connect to the database and use QuesryDSL
+  // val resultTest: List[Int] = withSQL {
+  //   select(sqls"1")
+  // }.map(rs => rs.int(1)).list.apply()
+  // println(resultTest)
 
   implicit val system: ActorSystem[Any] =
     ActorSystem(Behaviors.empty, "http-server-system")
   implicit val executionContext: ExecutionContext = system.executionContext
 
   val router: Route = concat(
-    pathPrefix("_api" / "health")(HealthRouter())
+    pathPrefix("_api" / "health")(HealthRouter()),
+    pathPrefix("_api" / "authentication")(AuthenticationRouter())
   )
 
-  val httpBindingFuture = Http().newServerAt(host, port).bind(router)
+  val bindingFuture = Http().newServerAt(host, port).bind(router)
+  println(s"[+] listening on http://$host:$port/ press RETURN to terminate app")
+  StdIn.readLine()
+  bindingFuture
+    .flatMap(_.unbind())
+    .onComplete(_ => system.terminate())
 }

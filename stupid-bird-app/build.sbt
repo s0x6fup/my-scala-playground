@@ -24,7 +24,9 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
       "org.scalikejdbc" %% "scalikejdbc" % scalikejdbcVersion,
+      "org.scalikejdbc" %% "scalikejdbc-interpolation" % scalikejdbcVersion,
       "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % scalikejdbcVersion,
+      "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
       "mysql" % "mysql-connector-java" % "8.0.33",
       "ch.qos.logback" % "logback-classic" % "1.5.6",
       "org.specs2" %% "specs2-core" % "4.3.6" % Test

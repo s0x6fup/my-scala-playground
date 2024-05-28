@@ -7,7 +7,7 @@ import com.stupidbird.controllers.AuthenticationController._
 import spray.json._
 
 trait AuthorizationJsonProtocol extends DefaultJsonProtocol {
-  implicit val registerRequestFormat = jsonFormat4(RegisterRequest)
+  implicit val registerRequestFormat = jsonFormat3(RegisterRequest)
   implicit val registerResponseFormat = jsonFormat1(RegisterResponse)
 }
 
@@ -19,11 +19,10 @@ object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupp
 
 case class RegisterRequest(
                             email: String,
-                            username: String,
                             password: String,
                             passwordConfirm: String
                           )
 
 case class RegisterResponse(
-                             status: String
+                             id: String
                            )

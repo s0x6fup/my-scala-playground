@@ -11,7 +11,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Route.seal
 import scala.util.{Success, Failure}
 import com.stupidbird.routers._
-import com.stupidbird.utils.CustomDataLayer
+import com.stupidbird.utils.DatabaseInitializer
 import scalikejdbc._
 
 object StupidbirdService extends App {
@@ -28,7 +28,7 @@ object StupidbirdService extends App {
   implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "http-server-system")
   implicit val executionContext: ExecutionContext = system.executionContext
 
-  //  println(CustomDataLayer.initTable[String]())
+  DatabaseInitializer.init()
 
   val router: Route = concat(
     pathPrefix("_api" / "health")(HealthRouter()),

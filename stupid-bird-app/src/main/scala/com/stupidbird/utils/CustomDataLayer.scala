@@ -12,25 +12,16 @@ object CustomDataLayer {
 
   def getOne[T](model: T, id: String)(implicit dbSession: DBSession) = ???
 
-  def initTable[T: TypeTag](): Unit = {
-    val tableName = typeOf[T].toString
-    DB readOnly { implicit dbSession =>
-      try {
-        sql"select 1 from ${tableName} limit 1".map(rs => rs.get[Int](1)).single()
-      } catch {
-        case e: java.sql.SQLException =>
-          DB autoCommit { implicit dbSession =>
-            sql"""create table asdf (
-                   id varchar(255) not null primary key,
-                   workspaceId varchar(255) not null,
-                   entity varchar(255),
-                   created_timestamp varchar(255),
-                   updated_timestamp varchar(255),
-                   unique (id)
-                 );""".execute()
-          }
-      }
-    }
-    ()
-  }
 }
+
+case class cdlEntity(
+                      id: String,
+                      tenantId: String,
+                      entity: String,
+                      createdTimestamp: String,
+                      updatedTimestamp: String
+                    )
+
+// TODO add a cdlEntity and then you can convert other entities to it and back
+// required obj -> json in entity field of cdlEntity
+// you will call the new object workspaceDomain and hardcode the table to workspace using override val tableName = "workspace"

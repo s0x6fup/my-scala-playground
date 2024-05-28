@@ -2,8 +2,9 @@ package com.stupidbird.utils
 
 import scalikejdbc._
 
+
 object DatabaseInitializer {
-  def apply(): Unit = {
+  def init(): Unit = {
     DB readOnly { implicit dbSession =>
       try {
         sql"select 1 from user limit 1".map(rs => rs.get[Int](1)).single()
@@ -11,40 +12,28 @@ object DatabaseInitializer {
         case e: java.sql.SQLException =>
           DB autoCommit { implicit dbSession =>
             sql"""create table user (
-                   id varchar(255) not null primary key,
-                   workspaceId varchar(255) not null,
-                   entity varchar(255),
-                   created_timestamp varchar(255),
-                   updated_timestamp varchar(255),
-                   unique (id)
-                 );
+                    id varchar(255) not null unique primary key,
+                    email varchar(255) not null unique,
+                    hash varchar(255) not null
+                  );""".execute.apply()
 
-                  create table workspace (
-                   id varchar(255) not null primary key,
-                   entity varchar(255),
-                   created_timestamp varchar(255),
-                   updated_timestamp varchar(255),
-                   unique (id)
-                 );
+            /*
+create table workspace (
+   id varchar(255) not null unique,
+   tenant_id varchar(255) not null,
+   entity varchar(255),
+   created_timestamp varchar(255),
+   updated_timestamp varchar(255)
+);
 
-                  create table notebook (
-                   id varchar(255) not null primary key,
-                   tenantId varchar(255) not null,
-                   entity varchar(255),
-                   created_timestamp varchar(255),
-                   updated_timestamp varchar(255),
-                   unique (id)
-                 );
-
-                 create table note (
-                   id varchar(255) not null primary key,
-                   tenantId varchar(255) not null,
-                   entity varchar(255),
-                   created_timestamp varchar(255),
-                   updated_timestamp varchar(255),
-                   unique (id)
-                 );
-                 """.execute()
+create table collection (
+  id varchar(255) not null unique,
+  tenant_id varchar(255) not null,
+  entity varchar(255),
+  created_timestamp varchar(255),
+  updated_timestamp varchar(255)
+);
+""".execute()*/
           }
       }
     }

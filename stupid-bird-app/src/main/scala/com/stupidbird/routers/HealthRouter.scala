@@ -13,7 +13,7 @@ trait HealthJsonProtocol extends DefaultJsonProtocol {
 
 object HealthRouter extends HealthJsonProtocol with SprayJsonSupport {
   def apply(): Route = (path("ishealthy") & get) {
-    complete(HealthResponse(IsHealthy()))
+    complete(IsHealthy())
   }
 }
 

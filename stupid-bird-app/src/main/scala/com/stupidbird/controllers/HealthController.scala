@@ -1,7 +1,9 @@
 package com.stupidbird.controllers
 
+import com.stupidbird.routers.HealthResponse
+
 object HealthController {
-  def IsHealthy():String = "ok"
+  def IsHealthy(): HealthResponse = HealthResponse("ok")
 
   //  import io.circe._
   //  import io.circe.generic.semiauto._

@@ -4,7 +4,7 @@ import scalikejdbc._
 
 import scala.concurrent.Future
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
-import com.stupidbird.models.User
+import com.stupidbird.models._
 import com.stupidbird.routers._
 import java.util.UUID.randomUUID
 import com.github.t3hnar.bcrypt._
@@ -12,33 +12,62 @@ import scala.util.Try
 
 object AuthenticationController {
 
-  def register(registerRequest: RegisterRequest): Future[RegisterResponse] = {
-    if (!doPasswordsMatch(registerRequest.password, registerRequest.passwordConfirm)) Future(RegisterResponse("password confirmation failed"))
+  def register(request: RegisterRequest): Future[RegisterResponse] = {
+    if (!doPasswordsMatch(request.password, request.passwordConfirm)) Future(RegisterResponse("password confirmation failed"))
     else for {
-      hash <- Future.fromTry(hashUserPassword(registerRequest.password))
-      maybeUserAdded <- addUserToDatabase(registerRequest.email, hash)
+      hash <- hashUserPassword(request.password)
+      maybeUserAdded <- createNewUser(request.email, hash)
     } yield RegisterResponse(maybeUserAdded)
   }
 
-  def login() = ???
+  def login(request: LoginRequest): Future[LoginResponse] = {
+    for {
+      maybeUser <- fetchUser(request.email)
+      passwordIsCorrect <- isPasswordCorrect(request.password, maybeUser.getOrElse(null.asInstanceOf[User]).hash)
+    } yield {
+      println(maybeUser.getOrElse(null.asInstanceOf[User]))
+      LoginResponse("tmp")
+    }
+  }
 
   def logout() = ???
 
-  private def hashUserPassword(password: String): Try[String] = password.bcryptSafeBounded(12)
+  def validateUserSession(sessionId: String): Future[Unit] = ???
 
-  private def addUserToDatabase(email: String, hash: String)(implicit dbSession: DBSession): Future[String] = Future {
+  private def createNewUser(email: String, hash: String)(implicit dbSession: DBSession): Future[String] = Future {
     val generatedId = randomUUID.toString
-    val userColumn = User.column
+    val u = User.column
     withSQL {
       insert.into(User).namedValues(
-        userColumn.id -> generatedId,
-        userColumn.email -> email,
-        userColumn.hash -> hash
+        u.id -> generatedId,
+        u.email -> email,
+        u.hash -> hash
       )
     }.update.apply()
-    "registration complete"
+    generatedId
   }
 
-  private def doPasswordsMatch(password: String, passwordConfirm: String): Boolean =
-    password == passwordConfirm
+  private def fetchUser(email: String): Future[Option[User]] = Future {
+    val u = User.syntax("u")
+    withSQL {
+      select(u.result.id, u.result.email, u.result.hash)
+        .from(User as u)
+        .where.eq(u.email, email)
+    }.map(rs => User(
+      rs.string(u.resultName.id),
+      rs.string(u.resultName.email),
+      rs.string(u.resultName.hash)
+    )).single.apply()
+  }
+
+  private def isPasswordCorrect(password: String, hash: String): Future[Boolean] = Future.fromTry(
+    password.isBcryptedSafeBounded(hash)
+  )
+
+  private def createSession(userId: String): Future[Unit] = ???
+
+  private def doPasswordsMatch(password: String, passwordConfirm: String): Boolean = password == passwordConfirm
+
+  private def hashUserPassword(password: String): Future[String] = Future.fromTry(password.bcryptSafeBounded(12))
+
 }

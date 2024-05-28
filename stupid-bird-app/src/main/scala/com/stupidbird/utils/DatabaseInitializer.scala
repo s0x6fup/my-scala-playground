@@ -16,27 +16,34 @@ object DatabaseInitializer {
                     email varchar(255) not null unique,
                     hash varchar(255) not null
                   );""".execute.apply()
+          }
 
-            /*
-create table workspace (
-   id varchar(255) not null unique,
-   tenant_id varchar(255) not null,
-   entity varchar(255),
-   created_timestamp varchar(255),
-   updated_timestamp varchar(255)
-);
-
-create table collection (
-  id varchar(255) not null unique,
-  tenant_id varchar(255) not null,
-  entity varchar(255),
-  created_timestamp varchar(255),
-  updated_timestamp varchar(255)
-);
-""".execute()*/
+          DB autoCommit { implicit dbSession =>
+            sql"""create table session (
+                    id varchar(255) not null unique primary key,
+                    user_id varchar(255) not null
+                  );""".execute.apply()
           }
       }
     }
     ()
   }
 }
+
+/*
+create table workspace (
+id varchar(255) not null unique,
+tenant_id varchar(255) not null,
+entity varchar(255),
+created_timestamp varchar(255),
+updated_timestamp varchar(255)
+);
+
+create table collection (
+id varchar(255) not null unique,
+tenant_id varchar(255) not null,
+entity varchar(255),
+created_timestamp varchar(255),
+updated_timestamp varchar(255)
+);
+""".execute()*/

@@ -1,9 +1,13 @@
 package com.stupidbird.controllers
 
 import com.stupidbird.routers.HealthResponse
+import com.stupidbird.utils.UserSession
 
 object HealthController {
-  def IsHealthy(): HealthResponse = HealthResponse("ok")
+  def IsHealthy()(implicit callScope: UserSession): HealthResponse = {
+    println(callScope)
+    HealthResponse("ok")
+  }
 
   //  import io.circe._
   //  import io.circe.generic.semiauto._

@@ -11,8 +11,10 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Route.seal
 import scala.util.{Success, Failure}
 import com.stupidbird.routers._
+import com.stupidbird.utils.SessionService._
 import com.stupidbird.utils.DatabaseInitializer
 import scalikejdbc._
+import java.util.UUID.randomUUID
 
 object StupidbirdService extends App {
   val host = "127.0.0.1"
@@ -30,12 +32,9 @@ object StupidbirdService extends App {
 
   DatabaseInitializer.init()
 
-  val router: Route = concat(
-    pathPrefix("_api" / "health")(HealthRouter()),
-    pathPrefix("_api" / "authentication")(AuthenticationRouter())
-  )
+  val allRouters = getUserSession { implicit callScope => HealthRouter() ~ AuthenticationRouter() }
 
-  val bindingFuture = Http().newServerAt(host, port).bind(router)
+  val bindingFuture = Http().newServerAt(host, port).bind(allRouters)
   println(s"[+] listening on http://$host:$port/ press RETURN to terminate app")
   StdIn.readLine()
   bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())

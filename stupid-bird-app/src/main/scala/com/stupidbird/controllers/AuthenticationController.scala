@@ -1,14 +1,17 @@
 package com.stupidbird.controllers
 
+import akka.http.scaladsl.model.headers.HttpCookie
+import com.stupidbird.StupidbirdService.{dbSession, executionContext}
+import com.stupidbird.utils.SessionService.createUserSession
+import com.stupidbird.models._
+import com.stupidbird.routers._
 import scalikejdbc._
 
 import scala.concurrent.Future
-import com.stupidbird.StupidbirdService.{dbSession, executionContext}
-import com.stupidbird.models._
-import com.stupidbird.routers._
 import java.util.UUID.randomUUID
 import com.github.t3hnar.bcrypt._
-import scala.util.Try
+import akka.http.scaladsl.server.Directives._
+import com.stupidbird.utils.UserSession
 
 object AuthenticationController {
 
@@ -24,15 +27,23 @@ object AuthenticationController {
     for {
       maybeUser <- fetchUser(request.email)
       passwordIsCorrect <- isPasswordCorrect(request.password, maybeUser.getOrElse(null.asInstanceOf[User]).hash)
+      userToken <- if (passwordIsCorrect) {
+        val user = maybeUser.getOrElse(null.asInstanceOf[User])
+        val userSession = UserSession(
+          userId = user.id,
+          accountId = "",
+          blogId = "",
+          sessionId = randomUUID.toString,
+          email = user.email
+        )
+        createUserSession(userSession)
+      } else Future("")
     } yield {
-      println(maybeUser.getOrElse(null.asInstanceOf[User]))
-      LoginResponse("tmp")
+      LoginResponse(userToken)
     }
   }
 
   def logout() = ???
-
-  def validateUserSession(sessionId: String): Future[Unit] = ???
 
   private def createNewUser(email: String, hash: String)(implicit dbSession: DBSession): Future[String] = Future {
     val generatedId = randomUUID.toString

@@ -19,9 +19,8 @@ object DatabaseInitializer {
           }
 
           DB autoCommit { implicit dbSession =>
-            sql"""create table session (
-                    id varchar(255) not null unique primary key,
-                    user_id varchar(255) not null
+            sql"""create table user_session (
+                    id varchar(255) not null unique primary key
                   );""".execute.apply()
           }
       }

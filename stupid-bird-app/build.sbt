@@ -27,6 +27,7 @@ lazy val root = (project in file("."))
       "org.scalikejdbc" %% "scalikejdbc-interpolation" % scalikejdbcVersion,
       "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % scalikejdbcVersion,
       "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
+      "com.github.jwt-scala" %% "jwt-core" % "10.0.1",
       "mysql" % "mysql-connector-java" % "8.0.33",
       "ch.qos.logback" % "logback-classic" % "1.5.6",
       "org.specs2" %% "specs2-core" % "4.3.6" % Test

@@ -2,11 +2,11 @@ package com.stupidbird.controllers
 
 import akka.http.scaladsl.model.headers.HttpCookie
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
-import com.stupidbird.utils.SessionService.createUserSession
+import com.stupidbird.utils.SessionService.{createUserSession, invalidateUserSession}
 import com.stupidbird.models._
+import com.stupidbird.routers
 import com.stupidbird.routers._
 import scalikejdbc._
-
 import scala.concurrent.Future
 import java.util.UUID.randomUUID
 import com.github.t3hnar.bcrypt._
@@ -43,7 +43,12 @@ object AuthenticationController {
     }
   }
 
-  def logout() = ???
+  def logout(request: LogoutRequest)(implicit callScope: UserSession): Future[LogoutResponse] = {
+    for {
+      _ <- invalidateUserSession(callScope)
+    } yield LogoutResponse()
+  }
+
 
   private def createNewUser(email: String, hash: String)(implicit dbSession: DBSession): Future[String] = Future {
     val generatedId = randomUUID.toString

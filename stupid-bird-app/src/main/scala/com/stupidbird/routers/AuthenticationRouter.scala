@@ -6,6 +6,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes.{NoContent, Unauthorized}
 import akka.http.scaladsl.model.headers.HttpCookie
 import com.stupidbird.controllers.AuthenticationController._
+import com.stupidbird.utils.UserSession
 import spray.json._
 
 import scala.util.{Failure, Success}
@@ -15,10 +16,12 @@ trait AuthorizationJsonProtocol extends DefaultJsonProtocol {
   implicit val registerResponseFormat = jsonFormat1(RegisterResponse)
   implicit val loginRequestFormat = jsonFormat2(LoginRequest)
   implicit val loginResponseFormat = jsonFormat1(LoginResponse)
+  implicit val logoutRequestFormat = jsonFormat0(LogoutRequest)
+  implicit val logoutResponseFormat = jsonFormat0(LogoutResponse)
 }
 
 object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupport {
-  def apply(): Route = concat(
+  def apply()(implicit callScope: UserSession): Route = concat(
     path("auth" / "register") {
       post {
         entity(as[RegisterRequest])(request => complete(register(request)))
@@ -35,6 +38,11 @@ object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupp
           }
           case Failure(error) => throw new Exception(error)
         })
+      }
+    },
+    path("auth" / "logout") {
+      post {
+        entity(as[LogoutRequest])(request => complete(logout(request)))
       }
     }
   )
@@ -57,4 +65,10 @@ case class LoginRequest(
 
 case class LoginResponse(
                           jwtToken: String
+                        )
+
+case class LogoutRequest(
+                       )
+
+case class LogoutResponse(
                         )

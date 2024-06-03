@@ -53,6 +53,10 @@ object SessionService {
     case None => provide(UserSession.anonymous)
   }
 
+  def invalidateUserSession(userSession: UserSession) =
+    Future(sql"delete from user_session where id = ${userSession.sessionId}".update.apply())
+
+
   private def extractUserSessionFromJwt(userSessionJwt: String): UserSession =
     Jwt.decodeRaw(userSessionJwt, jwtSecret, Seq(JwtAlgorithm.HS256)) match {
       case Success(userSessionJson) => extractUserSessionFromJson(userSessionJson)

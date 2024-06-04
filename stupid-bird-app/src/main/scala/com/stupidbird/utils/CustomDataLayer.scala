@@ -1,9 +1,6 @@
 package com.stupidbird.utils
 
 import scalikejdbc._
-import io.circe._
-import io.circe.generic.semiauto._
-import io.circe.syntax._
 import java.time.LocalDateTime
 import scala.reflect.runtime.universe._
 

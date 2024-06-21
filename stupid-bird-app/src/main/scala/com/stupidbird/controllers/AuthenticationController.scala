@@ -2,7 +2,7 @@ package com.stupidbird.controllers
 
 import akka.http.scaladsl.model.headers.HttpCookie
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
-import com.stupidbird.utils.SessionService.{createUserSession, invalidateUserAllSession, invalidateUserSession}
+import com.stupidbird.utils.SessionService._
 import com.stupidbird.models._
 import com.stupidbird.routers
 import com.stupidbird.routers._
@@ -53,8 +53,14 @@ object AuthenticationController {
 
   def logoutAll(request: LogoutAllRequest)(implicit callScope: UserSession): Future[LogoutAllResponse] = {
     for {
-      _ <- invalidateUserAllSession(callScope)
+      _ <- invalidateAllUserSessions(callScope)
     } yield LogoutAllResponse()
+  }
+
+  def listAllSessions(request: ListAllSessionsRequest)(implicit callScope: UserSession): Future[ListAllSessionsResponse] = {
+    for {
+      allUserSessions <- getAllUserSessions(callScope)
+    } yield ListAllSessionsResponse(allUserSessions)
   }
 
   private def createNewUser(email: String, hash: String)(implicit dbSession: DBSession): Future[String] = Future {

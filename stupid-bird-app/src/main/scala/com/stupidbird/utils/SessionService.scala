@@ -48,11 +48,16 @@ object SessionService extends DefaultJsonProtocol {
     case None => provide(anonymousUserSession)
   }
 
-  def invalidateUserSession(userSession: UserSession) =
+  def invalidateUserSession(userSession: UserSession): Future[Int] =
     Future(sql"delete from user_session where id = ${userSession.sessionId} and user_id = ${userSession.userId}".update.apply())
 
-  def invalidateUserAllSession(userSession: UserSession) =
+  def invalidateAllUserSessions(userSession: UserSession): Future[Int] =
     Future(sql"delete from user_session where user_id = ${userSession.userId}".update.apply())
+
+  def getAllUserSessions(userSession: UserSession): Future[Seq[String]] = Future {
+    val allUserSessionsIds: Seq[String] = sql"select id from user_session where user_id = ${userSession.userId}".map(rs => rs.string("id")).list.apply()
+    allUserSessionsIds
+  }
 
   private def extractUserSessionFromJwt(userSessionJwt: String): UserSession =
     Jwt.decodeRaw(userSessionJwt, jwtSecret, Seq(JwtAlgorithm.HS256)) match {

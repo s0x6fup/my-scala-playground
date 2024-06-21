@@ -2,11 +2,12 @@ package com.stupidbird.controllers
 
 import akka.http.scaladsl.model.headers.HttpCookie
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
-import com.stupidbird.utils.SessionService.{createUserSession, invalidateUserSession}
+import com.stupidbird.utils.SessionService.{createUserSession, invalidateUserAllSession, invalidateUserSession}
 import com.stupidbird.models._
 import com.stupidbird.routers
 import com.stupidbird.routers._
 import scalikejdbc._
+
 import scala.concurrent.Future
 import java.util.UUID.randomUUID
 import com.github.t3hnar.bcrypt._
@@ -34,7 +35,8 @@ object AuthenticationController {
           accountId = "",
           blogId = "",
           sessionId = randomUUID.toString,
-          email = user.email
+          email = user.email,
+          exp = (System.currentTimeMillis + 900000) / 1000
         )
         createUserSession(userSession)
       } else Future("")
@@ -49,6 +51,11 @@ object AuthenticationController {
     } yield LogoutResponse()
   }
 
+  def logoutAll(request: LogoutAllRequest)(implicit callScope: UserSession): Future[LogoutAllResponse] = {
+    for {
+      _ <- invalidateUserAllSession(callScope)
+    } yield LogoutAllResponse()
+  }
 
   private def createNewUser(email: String, hash: String)(implicit dbSession: DBSession): Future[String] = Future {
     val generatedId = randomUUID.toString
@@ -79,8 +86,6 @@ object AuthenticationController {
   private def isPasswordCorrect(password: String, hash: String): Future[Boolean] = Future.fromTry(
     password.isBcryptedSafeBounded(hash)
   )
-
-  private def createSession(userId: String): Future[Unit] = ???
 
   private def doPasswordsMatch(password: String, passwordConfirm: String): Boolean = password == passwordConfirm
 

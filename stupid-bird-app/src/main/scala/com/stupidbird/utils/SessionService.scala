@@ -18,24 +18,26 @@ case class UserSession(
                         accountId: String,
                         blogId: String,
                         sessionId: String,
-                        email: String
+                        email: String,
+                        exp: Long
                       )
 
 object SessionService extends DefaultJsonProtocol {
   val jwtSecret = randomUUID.toString
   implicit val clock: Clock = Clock.systemUTC
-  implicit val userSessionJsonFormat: RootJsonFormat[UserSession] = jsonFormat5(UserSession)
+  implicit val userSessionJsonFormat: RootJsonFormat[UserSession] = jsonFormat6(UserSession)
   lazy val anonymousUserSession: UserSession = UserSession(
     userId = "00000000-0000-0000-0000-000000000000",
     accountId = "00000000-0000-0000-0000-000000000000",
     blogId = "00000000-0000-0000-0000-000000000000",
     sessionId = "",
-    email = ""
+    email = "",
+    exp = 0
   )
 
 
   def createUserSession(userSession: UserSession): Future[String] = Future {
-    sql"insert into user_session (id) values (${userSession.sessionId})".update.apply()
+    sql"insert into user_session (id, user_id) values (${userSession.sessionId}, ${userSession.userId})".update.apply()
     Jwt.encode(userSession.toJson.toString, jwtSecret, JwtAlgorithm.HS256)
   }
 
@@ -47,8 +49,10 @@ object SessionService extends DefaultJsonProtocol {
   }
 
   def invalidateUserSession(userSession: UserSession) =
-    Future(sql"delete from user_session where id = ${userSession.sessionId}".update.apply())
+    Future(sql"delete from user_session where id = ${userSession.sessionId} and user_id = ${userSession.userId}".update.apply())
 
+  def invalidateUserAllSession(userSession: UserSession) =
+    Future(sql"delete from user_session where user_id = ${userSession.userId}".update.apply())
 
   private def extractUserSessionFromJwt(userSessionJwt: String): UserSession =
     Jwt.decodeRaw(userSessionJwt, jwtSecret, Seq(JwtAlgorithm.HS256)) match {
@@ -62,7 +66,7 @@ object SessionService extends DefaultJsonProtocol {
   }
 
   private def validateUserSessionNotLoggedOut(userSession: UserSession): UserSession = {
-    val doesExist: Option[Int] = sql"select 1 from user_session where id = ${userSession.sessionId} limit 1".map(_.int(1)).single.apply()
+    val doesExist: Option[Int] = sql"select 1 from user_session where id = ${userSession.sessionId} and user_id = ${userSession.userId} limit 1".map(_.int(1)).single.apply()
     doesExist match {
       case Some(_) => userSession
       case None => anonymousUserSession

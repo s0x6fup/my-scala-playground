@@ -18,6 +18,8 @@ trait AuthorizationJsonProtocol extends DefaultJsonProtocol {
   implicit val loginResponseFormat = jsonFormat1(LoginResponse)
   implicit val logoutRequestFormat = jsonFormat0(LogoutRequest)
   implicit val logoutResponseFormat = jsonFormat0(LogoutResponse)
+  implicit val logoutAllRequestFormat = jsonFormat0(LogoutAllRequest)
+  implicit val logoutAllResponseFormat = jsonFormat0(LogoutAllResponse)
 }
 
 object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupport {
@@ -44,6 +46,11 @@ object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupp
       post {
         entity(as[LogoutRequest])(request => complete(logout(request)))
       }
+    },
+    path("auth" / "logoutAll") {
+      post {
+        entity(as[LogoutAllRequest])(request => complete(logoutAll(request)))
+      }
     }
   )
 }
@@ -68,7 +75,13 @@ case class LoginResponse(
                         )
 
 case class LogoutRequest(
-                       )
+                        )
 
 case class LogoutResponse(
-                        )
+                         )
+
+case class LogoutAllRequest(
+                           )
+
+case class LogoutAllResponse(
+                            )

@@ -2,7 +2,6 @@ package com.stupidbird.utils
 
 import scalikejdbc._
 
-
 object DatabaseInitializer {
   def init(): Unit = {
     DB readOnly { implicit dbSession =>
@@ -20,7 +19,8 @@ object DatabaseInitializer {
 
           DB autoCommit { implicit dbSession =>
             sql"""create table user_session (
-                    id varchar(255) not null unique primary key
+                    id varchar(255) not null unique primary key,
+                    user_id varchar(255) not null
                   );""".execute.apply()
           }
       }

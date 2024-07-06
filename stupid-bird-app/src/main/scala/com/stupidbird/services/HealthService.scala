@@ -1,11 +1,10 @@
-package com.stupidbird.controllers
+package com.stupidbird.services
 
 import com.stupidbird.routers.HealthResponse
 import com.stupidbird.utils.UserSession
 
-object HealthController {
+object HealthService {
   def IsHealthy()(implicit callScope: UserSession): HealthResponse = {
-    println(callScope)
     HealthResponse("ok")
   }
 }

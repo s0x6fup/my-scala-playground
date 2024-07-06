@@ -17,11 +17,11 @@ import scalikejdbc._
 import java.util.UUID.randomUUID
 
 object StupidbirdService extends App {
-  val host = "127.0.0.1"
-  val port = 9001
-  val databaseUrl = "jdbc:mysql://127.0.0.1:3306/stupidbird"
-  val databaseUser = "stupidbird_user"
-  val databasePassword = "myverysecretpassword123!"
+  private val host = "127.0.0.1"
+  private val port = 9001
+  private val databaseUrl = "jdbc:mysql://127.0.0.1:3306/stupidbird"
+  private val databaseUser = "stupidbird_user"
+  private val databasePassword = "myverysecretpassword123!"
 
   Class.forName("com.mysql.cj.jdbc.Driver")
   ConnectionPool.singleton(databaseUrl, databaseUser, databasePassword)
@@ -32,9 +32,14 @@ object StupidbirdService extends App {
 
   DatabaseInitializer.init()
 
-  val allRouters = getUserSession { implicit callScope => HealthRouter() ~ AuthenticationRouter() }
+  private val allRouters = getUserSession { implicit callScope =>
+    HealthRouter() ~
+      AuthenticationRouter() ~
+      PostRouter() ~
+      CommentRouter()
+  }
 
-  val bindingFuture = Http().newServerAt(host, port).bind(allRouters)
+  private val bindingFuture = Http().newServerAt(host, port).bind(allRouters)
   println(s"[+] listening on http://$host:$port/ press RETURN to terminate app")
   StdIn.readLine()
   bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())

@@ -1,20 +1,20 @@
-package com.stupidbird.controllers
+package com.stupidbird.services
 
 import akka.http.scaladsl.model.headers.HttpCookie
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
 import com.stupidbird.utils.SessionService._
-import com.stupidbird.models._
+import com.stupidbird.domains._
 import com.stupidbird.routers
 import com.stupidbird.routers._
 import scalikejdbc._
-
 import scala.concurrent.Future
 import java.util.UUID.randomUUID
 import com.github.t3hnar.bcrypt._
 import akka.http.scaladsl.server.Directives._
 import com.stupidbird.utils.UserSession
+import com.stupidbird.utils.RolesConfig
 
-object AuthenticationController {
+object AuthenticationService {
 
   def register(request: RegisterRequest): Future[RegisterResponse] = {
     if (!doPasswordsMatch(request.password, request.passwordConfirm)) Future(RegisterResponse("password confirmation failed"))
@@ -32,11 +32,9 @@ object AuthenticationController {
         val user = maybeUser.getOrElse(null.asInstanceOf[User])
         val userSession = UserSession(
           userId = user.id,
-          accountId = "",
-          blogId = "",
           sessionId = randomUUID.toString,
-          email = user.email,
-          exp = (System.currentTimeMillis + 900000) / 1000
+          role = user.role, // todo: derive role form table
+          exp = (System.currentTimeMillis + 14400000) / 1000 // 4 hours
         )
         createUserSession(userSession)
       } else Future("")
@@ -70,7 +68,8 @@ object AuthenticationController {
       insert.into(User).namedValues(
         u.id -> generatedId,
         u.email -> email,
-        u.hash -> hash
+        u.hash -> hash,
+        u.role -> RolesConfig.User
       )
     }.update.apply()
     generatedId
@@ -79,13 +78,14 @@ object AuthenticationController {
   private def fetchUser(email: String): Future[Option[User]] = Future {
     val u = User.syntax("u")
     withSQL {
-      select(u.result.id, u.result.email, u.result.hash)
+      select(u.result.id, u.result.email, u.result.hash, u.result.role)
         .from(User as u)
         .where.eq(u.email, email)
     }.map(rs => User(
       rs.string(u.resultName.id),
       rs.string(u.resultName.email),
-      rs.string(u.resultName.hash)
+      rs.string(u.resultName.hash),
+      rs.string(u.resultName.role)
     )).single.apply()
   }
 

@@ -1,11 +1,12 @@
-package com.stupidbird.models
+package com.stupidbird.domains
 
 import scalikejdbc._
 
 case class User(
                  id: String,
                  email: String,
-                 hash: String
+                 hash: String,
+                 role: String
                )
 
 object User extends SQLSyntaxSupport[User] {
@@ -13,6 +14,7 @@ object User extends SQLSyntaxSupport[User] {
     new User(
       rs.string(u.id),
       rs.string(u.email),
-      rs.string(u.hash)
+      rs.string(u.hash),
+      rs.string(u.role)
     )
 }

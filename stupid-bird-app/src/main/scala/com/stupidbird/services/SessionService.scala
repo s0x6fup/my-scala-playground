@@ -1,7 +1,7 @@
 package com.stupidbird.utils
 
 import akka.http.scaladsl.server.Directive1
-import com.stupidbird.models.User
+import com.stupidbird.domains.User
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
 import java.time.Clock
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions}
@@ -12,29 +12,25 @@ import com.stupidbird.utils
 import scalikejdbc._
 import scala.util.{Failure, Success}
 import spray.json._
+import com.stupidbird.utils.RolesConfig
 
 case class UserSession(
                         userId: String,
-                        accountId: String,
-                        blogId: String,
                         sessionId: String,
-                        email: String,
+                        role: String,
                         exp: Long
                       )
 
 object SessionService extends DefaultJsonProtocol {
   val jwtSecret = randomUUID.toString
   implicit val clock: Clock = Clock.systemUTC
-  implicit val userSessionJsonFormat: RootJsonFormat[UserSession] = jsonFormat6(UserSession)
+  implicit val userSessionJsonFormat: RootJsonFormat[UserSession] = jsonFormat4(UserSession)
   lazy val anonymousUserSession: UserSession = UserSession(
     userId = "00000000-0000-0000-0000-000000000000",
-    accountId = "00000000-0000-0000-0000-000000000000",
-    blogId = "00000000-0000-0000-0000-000000000000",
-    sessionId = "",
-    email = "",
+    sessionId = "00000000-0000-0000-0000-000000000000",
+    role = RolesConfig.Anonymous,
     exp = 0
   )
-
 
   def createUserSession(userSession: UserSession): Future[String] = Future {
     sql"insert into user_session (id, user_id) values (${userSession.sessionId}, ${userSession.userId})".update.apply()

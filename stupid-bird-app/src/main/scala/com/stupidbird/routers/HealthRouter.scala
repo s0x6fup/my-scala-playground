@@ -3,9 +3,12 @@ package com.stupidbird.routers
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.stupidbird.controllers.HealthController._
+import akka.http.scaladsl.model.StatusCodes.Unauthorized
+import com.stupidbird.services.HealthService._
 import com.stupidbird.utils.UserSession
+import com.stupidbird.utils.AuthorizationClient.withAuth
 import spray.json._
+import scalikejdbc._
 
 trait HealthJsonProtocol extends DefaultJsonProtocol {
   implicit val healthRequestFormat: RootJsonFormat[HealthRequest] = jsonFormat0(HealthRequest)
@@ -13,9 +16,10 @@ trait HealthJsonProtocol extends DefaultJsonProtocol {
 }
 
 object HealthRouter extends HealthJsonProtocol with SprayJsonSupport {
-  def apply()(implicit callScope: UserSession): Route = (path("health") & get) {
-    complete(IsHealthy())
-  }
+  def apply()(implicit callScope: UserSession): Route =
+    (path("health") & get) {
+      withAuth("health.read", complete(IsHealthy()))
+    }
 }
 
 case class HealthRequest()
@@ -23,3 +27,4 @@ case class HealthRequest()
 case class HealthResponse(
                            status: String
                          )
+

@@ -4,6 +4,7 @@ services:
 
   mysqldb:
     image: mysql:8.0
+    platform: linux/amd64
     container_name: stupidbird-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=toor
@@ -12,3 +13,4 @@ services:
       - MYSQL_PASSWORD=myverysecretpassword123!
     ports:
       - 3306:3306
+

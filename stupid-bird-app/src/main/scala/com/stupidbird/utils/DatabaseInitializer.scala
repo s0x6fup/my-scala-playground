@@ -13,7 +13,8 @@ object DatabaseInitializer {
             sql"""create table user (
                     id varchar(255) not null unique primary key,
                     email varchar(255) not null unique,
-                    hash varchar(255) not null
+                    hash varchar(255) not null,
+                    role varchar(255) not null
                   );""".execute.apply()
           }
 
@@ -23,26 +24,29 @@ object DatabaseInitializer {
                     user_id varchar(255) not null
                   );""".execute.apply()
           }
+
+          DB autoCommit { implicit dbSession =>
+            sql"""create table post (
+                    id varchar(255) not null unique primary key,
+                    user_id varchar(255) not null,
+                    title varchar(255) not null,
+                    body varchar(255) not null,
+                    archived int default 0
+                  );""".execute.apply()
+          }
+
+          DB autoCommit { implicit dbSession =>
+            sql"""create table comment (
+                    id varchar(255) not null unique primary key,
+                    user_id varchar(255) not null,
+                    post_id varchar(255) not null,
+                    body varchar(255) not null,
+                    archived int default 0
+                  );""".execute.apply()
+          }
       }
     }
     ()
   }
 }
 
-/*
-create table workspace (
-id varchar(255) not null unique,
-tenant_id varchar(255) not null,
-entity varchar(255),
-created_timestamp varchar(255),
-updated_timestamp varchar(255)
-);
-
-create table collection (
-id varchar(255) not null unique,
-tenant_id varchar(255) not null,
-entity varchar(255),
-created_timestamp varchar(255),
-updated_timestamp varchar(255)
-);
-""".execute()*/

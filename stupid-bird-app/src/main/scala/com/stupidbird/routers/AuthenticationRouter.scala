@@ -5,10 +5,10 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes.{NoContent, Unauthorized}
 import akka.http.scaladsl.model.headers.HttpCookie
-import com.stupidbird.controllers.AuthenticationController._
+import com.stupidbird.services.AuthenticationService._
 import com.stupidbird.utils.UserSession
+import com.stupidbird.utils.AuthorizationClient.withAuth
 import spray.json._
-
 import scala.util.{Failure, Success}
 
 trait AuthorizationJsonProtocol extends DefaultJsonProtocol {
@@ -28,9 +28,10 @@ object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupp
   def apply()(implicit callScope: UserSession): Route = concat(
     path("auth" / "register") {
       post {
-        entity(as[RegisterRequest])(request => complete(register(request)))
+        entity(as[RegisterRequest])(request => withAuth("authn.register", complete(register(request))))
       }
     },
+    // todo: move all logic to the controller so i can add a permissions here
     path("auth" / "login") {
       post {
         entity(as[LoginRequest])(request => onComplete(login(request)) {
@@ -46,19 +47,22 @@ object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupp
     },
     path("auth" / "logout") {
       post {
-        entity(as[LogoutRequest])(request => complete(logout(request)))
+        entity(as[LogoutRequest])(request => withAuth("authn.logout", complete(logout(request))))
       }
     },
     path("auth" / "logoutAll") {
       post {
-        entity(as[LogoutAllRequest])(request => complete(logoutAll(request)))
+        entity(as[LogoutAllRequest])(request => withAuth("authn.logoutAll", complete(logoutAll(request))))
       }
     },
     path("auth" / "listAllSessions") {
       get {
-        complete(listAllSessions(ListAllSessionsRequest()))
+        withAuth("authn.listAllSessions", complete(listAllSessions(ListAllSessionsRequest())))
       }
-    }
+    },
+    // archive user (soft delete)
+    // list archived users (ONLY ADMIN)
+    // delete user (ONLY ADMIN)
   )
 }
 

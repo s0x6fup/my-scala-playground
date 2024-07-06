@@ -15,10 +15,9 @@ import scala.util.{Failure, Success}
 trait CommentJsonProtocol extends DefaultJsonProtocol {
   implicit val createCommentRequestFormat: RootJsonFormat[CreateCommentRequest] = jsonFormat2(CreateCommentRequest)
   implicit val createCommentResponseFormat: RootJsonFormat[CreateCommentResponse] = jsonFormat1(CreateCommentResponse)
-  //  // i need this for nested Comments in get all Comments response
-  //  implicit val CommentFormat: RootJsonFormat[Comment] = jsonFormat4(Comment.apply2) // This explicitly tells the compiler to use the apply method of the Comment companion object, which should match the case class constructor
-  //  implicit val getAllCommentsRequestFormat: RootJsonFormat[GetAllCommentsRequest] = jsonFormat0(GetAllCommentsRequest)
-  //  implicit val getAllCommentsResponseFormat: RootJsonFormat[GetAllCommentsResponse] = jsonFormat1(GetAllCommentsResponse)
+  implicit val CommentFormat: RootJsonFormat[Comment] = jsonFormat4(Comment.apply)
+  implicit val GetPostCommentsRequestFormat: RootJsonFormat[GetPostCommentsRequest] = jsonFormat1(GetPostCommentsRequest)
+  implicit val GetPostCommentsResponseFormat: RootJsonFormat[GetPostCommentsResponse] = jsonFormat1(GetPostCommentsResponse)
   //  implicit val getCommentRequestFormat: RootJsonFormat[GetCommentRequest] = jsonFormat1(GetCommentRequest)
   //  implicit val getCommentResponseFormat: RootJsonFormat[GetCommentResponse] = jsonFormat1(GetCommentResponse)
   //  implicit val getMyCommentsRequestFormat: RootJsonFormat[GetMyCommentsRequest] = jsonFormat0(GetMyCommentsRequest)
@@ -38,11 +37,11 @@ object CommentRouter extends CommentJsonProtocol with SprayJsonSupport {
         entity(as[CreateCommentRequest])(request => withAuth("comment.create", complete(createComment(request))))
       }
     },
-    //    path("comment" / "all") {
-    //      get {
-    //        withAuth("Comment.read", complete(getAllComments(GetAllCommentsRequest())))
-    //      }
-    //    },
+    path("comment" / "post" / Segment) {
+      postIdFromPath => get {
+        withAuth("comment.read", complete(getPostComments(GetPostCommentsRequest(postIdFromPath))))
+      }
+    },
     //    path("comment" / "my") {
     //      get {
     //        withAuth("Comment.read", complete(getMyComments(GetMyCommentsRequest())))
@@ -81,9 +80,19 @@ case class CreateCommentResponse(
                                   id: String
                                 )
 
-//case class GetAllCommentsRequest()
+case class GetPostCommentsRequest(
+                                   postId: String
+                                 )
+
+case class GetPostCommentsResponse(
+                                    comments: Seq[Comment]
+                                  )
+
+
+
+//case class GetPostCommentsRequest()
 //
-//case class GetAllCommentsResponse(
+//case class GetPostCommentsResponse(
 //                                Comments: List[Comment]
 //                              )
 //

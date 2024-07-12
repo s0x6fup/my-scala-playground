@@ -1,7 +1,6 @@
 package com.stupidbird.services
 
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
-import com.stupidbird.utils.SessionService._
 import com.stupidbird.domains._
 import com.stupidbird.routers._
 import scalikejdbc._

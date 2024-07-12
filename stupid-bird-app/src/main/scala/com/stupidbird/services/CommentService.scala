@@ -15,7 +15,7 @@ object CommentService {
       post <- PostService.getSinglePost(GetPostRequest(request.postId))
       maybeCommentId <- post match {
         case GetPostResponse(data) =>
-          if (data.id == "") createNewComment(callScope.userId, request.postId, request.body)
+          if (data.id != "") createNewComment(callScope.userId, request.postId, request.body)
           else Future("")
         case _ => Future("")
       }

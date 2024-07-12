@@ -17,7 +17,7 @@ object CommentService {
       post <- PostService.getSinglePost(GetPostRequest(request.postId))
       maybeCommentId <- post match {
         case GetPostResponse(data) =>
-          if (data.id != "") createNewComment(callScope.userId, request.postId, request.body)
+          if (data.id == "") createNewComment(callScope.userId, request.postId, request.body)
           else Future("")
         case _ => Future("")
       }
@@ -31,43 +31,43 @@ object CommentService {
     } yield GetPostCommentsResponse(maybeAllCommentsOnPost)
   }
 
-  //  def getSingleComment(request: GetCommentRequest)(implicit callScope: UserSession): Future[GetCommentResponse] = {
-  //    for {
-  //      post <- fetchCommentById(request.id)
-  //    } yield GetCommentResponse(post.getOrElse(Comment.empty()))
-  //  }
+  def getSingleComment(request: GetCommentRequest)(implicit callScope: UserSession): Future[GetCommentResponse] = {
+    for {
+      post <- selectCommentById(request.id)
+    } yield GetCommentResponse(post.getOrElse(Comment.empty()))
+  }
 
-  //  def getMyComments(request: GetMyCommentsRequest)(implicit callScope: UserSession): Future[GetMyCommentsResponse] = {
-  //    for {
-  //      myComments <- fetchCommentsByUserId(callScope.userId)
-  //    } yield GetMyCommentsResponse(myComments)
-  //  }
+  def getMyComments(request: GetMyCommentsRequest)(implicit callScope: UserSession): Future[GetMyCommentsResponse] = {
+    for {
+      myComments <- selectCommentsByUserId(callScope.userId)
+    } yield GetMyCommentsResponse(myComments)
+  }
 
-  //  def getUserComments(request: GetUserCommentsRequest)(implicit callScope: UserSession): Future[GetUserCommentsResponse] = {
-  //    for {
-  //      userComments <- fetchCommentsByUserId(callScope.userId)
-  //    } yield GetUserCommentsResponse(userComments)
-  //  }
+  def getUserComments(request: GetUserCommentsRequest)(implicit callScope: UserSession): Future[GetUserCommentsResponse] = {
+    for {
+      userComments <- selectCommentsByUserId(request.userId)
+    } yield GetUserCommentsResponse(userComments)
+  }
 
-  //  def updateComment(request: UpdateCommentRequest)(implicit callScope: UserSession): Future[UpdateCommentResponse] = {
-  //    for {
-  //      status <- updateUserComment(request.id, callScope.userId, request.postId, request.body)
-  //    } yield UpdateCommentResponse(
-  //        if (status == 0) "Failed to update"
-  //        else if (status == 1) "Successfully updated"
-  //        else "Unexpected behavior"
-  //    )
-  //  }
+  def updateComment(request: UpdateCommentRequest)(implicit callScope: UserSession): Future[UpdateCommentResponse] = {
+    for {
+      status <- updateCommentById(request.id, callScope.userId,  request.body)
+    } yield UpdateCommentResponse(
+      if (status == 0) "Failed to update"
+      else if (status == 1) "Successfully updated"
+      else "Unexpected behavior"
+    )
+  }
 
-  //  def deleteComment(request: DeleteCommentRequest)(implicit callScope: UserSession): Future[DeleteCommentResponse] = {
-  //    for {
-  //      status <- deleteUserComment(request.id)
-  //    } yield DeleteCommentResponse(
-  //        if (status == 0) "Failed to update"
-  //        else if (status == 1) "Successfully updated"
-  //        else "Unexpected behavior"
-  //    )
-  //  }
+  def deleteComment(request: DeleteCommentRequest)(implicit callScope: UserSession): Future[DeleteCommentResponse] = {
+    for {
+      status <- deleteCommentById(request.id)
+    } yield DeleteCommentResponse(
+      if (status == 0) "Failed to update"
+      else if (status == 1) "Successfully updated"
+      else "Unexpected behavior"
+    )
+  }
 
   private def createNewComment(userId: String, postId: String, body: String)(implicit dbSession: DBSession): Future[String] = Future {
     val generatedId = randomUUID.toString
@@ -96,50 +96,49 @@ object CommentService {
     )).list.apply()
   }
 
-  //  private def fetchCommentById(id: String)(implicit dbSession: DBSession): Future[Option[Comment]] = Future {
-  //    val c = Comment.syntax("c")
-  //    withSQL {
-  //      select(c.result.id, c.result.userId, c.result.postId, c.result.body)
-  //        .from(Comment as c)
-  //        .where.eq(c.id, id)
-  //    }.map(rs => Comment(
-  //      rs.string(c.resultName.id),
-  //      rs.string(c.resultName.userId),
-  //      rs.string(c.resultName.postId),
-  //      rs.string(c.resultName.body)
-  //    )).single.apply()
-  //  }
+  private def selectCommentById(id: String)(implicit dbSession: DBSession): Future[Option[Comment]] = Future {
+    val c = Comment.syntax("c")
+    withSQL {
+      select(c.result.id, c.result.userId, c.result.postId, c.result.body)
+        .from(Comment as c)
+        .where.eq(c.id, id)
+    }.map(rs => Comment(
+      rs.string(c.resultName.id),
+      rs.string(c.resultName.userId),
+      rs.string(c.resultName.postId),
+      rs.string(c.resultName.body)
+    )).single.apply()
+  }
 
-  //  private def fetchCommentsByUserId(userId: String)(implicit dbSession: DBSession): Future[List[Comment]] = Future {
-  //    val c = Comment.syntax("c")
-  //    withSQL {
-  //      select(c.result.id, c.result.userId, c.result.postId, c.result.body)
-  //        .from(Comment as c)
-  //        .where.eq(c.userId, userId)
-  //    }.map(rs => Comment(
-  //      rs.string(c.resultName.id),
-  //      rs.string(c.resultName.userId),
-  //      rs.string(c.resultName.postId),
-  //      rs.string(c.resultName.body)
-  //    )).list.apply()
-  //  }
+  private def selectCommentsByUserId(userId: String)(implicit dbSession: DBSession): Future[List[Comment]] = Future {
+    val c = Comment.syntax("c")
+    withSQL {
+      select(c.result.id, c.result.userId, c.result.postId, c.result.body)
+        .from(Comment as c)
+        .where.eq(c.userId, userId)
+    }.map(rs => Comment(
+      rs.string(c.resultName.id),
+      rs.string(c.resultName.userId),
+      rs.string(c.resultName.postId),
+      rs.string(c.resultName.body)
+    )).list.apply()
+  }
 
-  //  private def updateUserComment(id: String, userId: String, postId: String, body: String)(implicit dbSession: DBSession): Future[Int] = Future {
-  //    val c = Comment.column
-  //    withSQL {
-  //      update(Comment).set(
-  //        c.postId -> postId,
-  //        c.body -> body
-  //      ).where.eq(c.id, id).and.eq(c.userId, userId) // prevent IDORs on update, todo: have this done implicitly
-  //    }.update.apply()
-  //  }
+  private def updateCommentById(id: String, userId: String, body: String)(implicit dbSession: DBSession): Future[Int] = Future {
+    val c = Comment.column
+    withSQL {
+      update(Comment).set(
+        c.body -> body
+      ).where.eq(c.id, id).and.eq(c.userId, userId) // prevent IDORs on update, todo: have this done implicitly
+    }.update.apply()
+  }
 
-  //  // dangerous: should only be done by admin
-  //  private def deleteUserComment(id: String)(implicit dbSession: DBSession): Future[Int] = Future {
-  //    val c = Comment.column
-  //    withSQL {
-  //      delete.from(Comment).where.eq(c.id, id)
-  //    }.update.apply()
-  //  }
+  // dangerous: should only be done by admin
+  private def deleteCommentById(id: String)(implicit dbSession: DBSession): Future[Int] = Future {
+    val c = Comment.column
+    withSQL {
+      delete.from(Comment).where.eq(c.id, id)
+    }.update.apply()
+  }
 
 }

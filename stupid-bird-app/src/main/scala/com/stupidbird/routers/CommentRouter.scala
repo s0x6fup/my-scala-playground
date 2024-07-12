@@ -18,56 +18,70 @@ trait CommentJsonProtocol extends DefaultJsonProtocol {
   implicit val CommentFormat: RootJsonFormat[Comment] = jsonFormat4(Comment.apply)
   implicit val GetPostCommentsRequestFormat: RootJsonFormat[GetPostCommentsRequest] = jsonFormat1(GetPostCommentsRequest)
   implicit val GetPostCommentsResponseFormat: RootJsonFormat[GetPostCommentsResponse] = jsonFormat1(GetPostCommentsResponse)
-  //  implicit val getCommentRequestFormat: RootJsonFormat[GetCommentRequest] = jsonFormat1(GetCommentRequest)
-  //  implicit val getCommentResponseFormat: RootJsonFormat[GetCommentResponse] = jsonFormat1(GetCommentResponse)
-  //  implicit val getMyCommentsRequestFormat: RootJsonFormat[GetMyCommentsRequest] = jsonFormat0(GetMyCommentsRequest)
-  //  implicit val getMyCommentsResponseFormat: RootJsonFormat[GetMyCommentsResponse] = jsonFormat1(GetMyCommentsResponse)
-  //  implicit val getUserCommentsRequestFormat: RootJsonFormat[GetUserCommentsRequest] = jsonFormat1(GetUserCommentsRequest)
-  //  implicit val getUserCommentsResponseFormat: RootJsonFormat[GetUserCommentsResponse] = jsonFormat1(GetUserCommentsResponse)
-  //  implicit val updateCommentRequestFormat: RootJsonFormat[UpdateCommentRequest] = jsonFormat3(UpdateCommentRequest)
-  //  implicit val updateCommentResponseFormat: RootJsonFormat[UpdateCommentResponse] = jsonFormat1(UpdateCommentResponse)
-  //  implicit val deleteCommentRequestFormat: RootJsonFormat[DeleteCommentRequest] = jsonFormat1(DeleteCommentRequest)
-  //  implicit val deleteCommentResponseFormat: RootJsonFormat[DeleteCommentResponse] = jsonFormat1(DeleteCommentResponse)
+  implicit val getCommentRequestFormat: RootJsonFormat[GetCommentRequest] = jsonFormat1(GetCommentRequest)
+  implicit val getCommentResponseFormat: RootJsonFormat[GetCommentResponse] = jsonFormat1(GetCommentResponse)
+  implicit val getMyCommentsRequestFormat: RootJsonFormat[GetMyCommentsRequest] = jsonFormat0(GetMyCommentsRequest)
+  implicit val getMyCommentsResponseFormat: RootJsonFormat[GetMyCommentsResponse] = jsonFormat1(GetMyCommentsResponse)
+  implicit val getUserCommentsRequestFormat: RootJsonFormat[GetUserCommentsRequest] = jsonFormat1(GetUserCommentsRequest)
+  implicit val getUserCommentsResponseFormat: RootJsonFormat[GetUserCommentsResponse] = jsonFormat1(GetUserCommentsResponse)
+  implicit val updateCommentRequestFormat: RootJsonFormat[UpdateCommentRequest] = jsonFormat2(UpdateCommentRequest)
+  implicit val updateCommentResponseFormat: RootJsonFormat[UpdateCommentResponse] = jsonFormat1(UpdateCommentResponse)
+  implicit val deleteCommentRequestFormat: RootJsonFormat[DeleteCommentRequest] = jsonFormat1(DeleteCommentRequest)
+  implicit val deleteCommentResponseFormat: RootJsonFormat[DeleteCommentResponse] = jsonFormat1(DeleteCommentResponse)
 }
 
 object CommentRouter extends CommentJsonProtocol with SprayJsonSupport {
   def apply()(implicit callScope: UserSession): Route = concat(
+
     path("comment" / "create") {
       post {
         entity(as[CreateCommentRequest])(request => withAuth("comment.create", complete(createComment(request))))
       }
     },
+
     path("comment" / "post" / Segment) {
       postIdFromPath => get {
         withAuth("comment.read", complete(getPostComments(GetPostCommentsRequest(postIdFromPath))))
       }
     },
-    //    path("comment" / "my") {
-    //      get {
-    //        withAuth("Comment.read", complete(getMyComments(GetMyCommentsRequest())))
-    //      }
-    //    },
-    //    path("comment" / "user" / Segment) { // passing a path variable :)
-    //      userIdFromPath: String => get {
-    //        withAuth("Comment.read", complete(getUserComments(GetUserCommentsRequest(userIdFromPath))))
-    //      }
-    //    },
-    //    path("comment" / "single" / Segment) {
-    //      CommentIdFromPath: String => get {
-    //        withAuth("Comment.read", complete(getSingleComment(GetCommentRequest(CommentIdFromPath))))
-    //      }
-    //    },
-    //    path("comment" / "update" / Segment) {
-    //      CommentIdFromPath: String => Comment {
-    //        entity(as[UpdateCommentRequest])(request => withAuth("Comment.update", complete(updateComment(request))))
-    //      }
-    //    },
-    //    // todo: archive Comment (soft delete)
-    //    path("comment" / "delete" / Segment) {
-    //      CommentIdFromPath: String => Comment {
-    //        entity(as[DeleteCommentRequest])(request => withAuth("Comment.delete", complete(deleteComment(request))))
-    //      }
-    //    }
+
+    path("comment" / "my") {
+      get {
+        withAuth("comment.read", complete(getMyComments(GetMyCommentsRequest())))
+      }
+    },
+
+    path("comment" / "user" / Segment) {
+      userIdFromPath: String => get {
+        withAuth("comment.read", complete(getUserComments(GetUserCommentsRequest(userIdFromPath))))
+      }
+    },
+
+    path("comment" / "single" / Segment) {
+      CommentIdFromPath: String => get {
+        withAuth("comment.read", complete(getSingleComment(GetCommentRequest(CommentIdFromPath))))
+      }
+    },
+
+    path("comment" / "update" / Segment) {
+      CommentIdFromPath: String => post {
+        entity(as[UpdateCommentRequest])(request => {
+          val overridenRequest = UpdateCommentRequest(
+            id = CommentIdFromPath,
+            body = request.body
+          )
+          withAuth("comment.update", complete(updateComment(overridenRequest)))
+        })
+      }
+    },
+
+    // todo: archive Comment (soft delete)
+    path("comment" / "delete" / Segment) {
+      commentIdFromPath: String => delete {
+        withAuth("comment.delete", complete(deleteComment(DeleteCommentRequest(commentIdFromPath))))
+      }
+    }
+
   )
 }
 
@@ -88,51 +102,42 @@ case class GetPostCommentsResponse(
                                     comments: Seq[Comment]
                                   )
 
+case class GetCommentRequest(
+                              id: String
+                            )
 
+case class GetCommentResponse(
+                               Comment: Comment
+                             )
 
-//case class GetPostCommentsRequest()
-//
-//case class GetPostCommentsResponse(
-//                                Comments: List[Comment]
-//                              )
-//
-//case class GetCommentRequest(
-//                           id: String
-//                         )
-//
-//case class GetCommentResponse(
-//                            Comment: Comment
-//                          )
-//
-//case class GetMyCommentsRequest(
-//                            )
-//
-//case class GetMyCommentsResponse(
-//                               Comment: List[Comment]
-//                             )
-//
-//case class GetUserCommentsRequest(
-//                                userId: String
-//                              )
-//
-//case class GetUserCommentsResponse(
-//                                 Comment: List[Comment]
-//                               )
-//
-//case class UpdateCommentRequest(
-//                              id: String,
-//                              title: String,
-//                              body: String
-//                            )
-//
-//case class UpdateCommentResponse(
-//                               status: String
-//                             )
-//
-//case class DeleteCommentRequest(
-//                              id: String
-//                            )
-//
-//case class DeleteCommentResponse(
-//                               status: String
-//                             )
+case class GetMyCommentsRequest(
+                               )
+
+case class GetMyCommentsResponse(
+                                  Comments: Seq[Comment]
+                                )
+
+case class GetUserCommentsRequest(
+                                   userId: String
+                                 )
+
+case class GetUserCommentsResponse(
+                                    Comments: Seq[Comment]
+                                  )
+
+case class UpdateCommentRequest(
+                                 id: String,
+                                 body: String
+                               )
+
+case class UpdateCommentResponse(
+                                  status: String
+                                )
+
+case class DeleteCommentRequest(
+                                 id: String
+                               )
+
+case class DeleteCommentResponse(
+                                  status: String
+                                )

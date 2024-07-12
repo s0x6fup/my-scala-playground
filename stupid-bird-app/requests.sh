@@ -1,14 +1,22 @@
 #!/bin/bash
 
 ## create comment
-#curl --request "POST" "http://localhost:9001/comment/create" \
-#	--header "content-type: application/json" \
-#	--data "{\"postId\":\"somePostId\",\"body\":\"someBody\"}" \
+#echo '[+] creating comments'
+#curl --request 'POST' 'http://localhost:9001/comment/create' \
+#	--header 'content-type: application/json' \
+#	--data '{"postId":"somePostId","body":"someBody"}' \
 #	--include \
-#	&& echo
+#	&& echo && echo
 
 # get all comment for a single post
-curl --request "GET" "http://localhost:9001/comment/post/somePostId" \
+echo '[+] getting comments by post id'
+curl --request 'GET' 'http://localhost:9001/comment/post/somePostId' \
 	--include \
-	&& echo ""
+	&& echo && echo
+
+# get my comments (using anonymous for testing)
+echo '[+] getting MY comments'
+curl --request 'GET' 'http://localhost:9001/comment/post/my' \
+	--include \
+	&& echo && echo 
 

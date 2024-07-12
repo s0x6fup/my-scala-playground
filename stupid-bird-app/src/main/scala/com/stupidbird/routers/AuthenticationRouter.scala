@@ -12,16 +12,16 @@ import spray.json._
 import scala.util.{Failure, Success}
 
 trait AuthorizationJsonProtocol extends DefaultJsonProtocol {
-  implicit val registerRequestFormat = jsonFormat3(RegisterRequest)
-  implicit val registerResponseFormat = jsonFormat1(RegisterResponse)
-  implicit val loginRequestFormat = jsonFormat2(LoginRequest)
-  implicit val loginResponseFormat = jsonFormat1(LoginResponse)
-  implicit val logoutRequestFormat = jsonFormat0(LogoutRequest)
-  implicit val logoutResponseFormat = jsonFormat0(LogoutResponse)
-  implicit val logoutAllRequestFormat = jsonFormat0(LogoutAllRequest)
-  implicit val logoutAllResponseFormat = jsonFormat0(LogoutAllResponse)
-  implicit val listAllSessionsRequestFormat = jsonFormat0(ListAllSessionsRequest)
-  implicit val listAllSessionsResponseFormat = jsonFormat1(ListAllSessionsResponse)
+  implicit val registerRequestFormat: RootJsonFormat[RegisterRequest] = jsonFormat3(RegisterRequest)
+  implicit val registerResponseFormat: RootJsonFormat[RegisterResponse] = jsonFormat1(RegisterResponse)
+  implicit val loginRequestFormat: RootJsonFormat[LoginRequest] = jsonFormat2(LoginRequest)
+  implicit val loginResponseFormat: RootJsonFormat[LoginResponse] = jsonFormat1(LoginResponse)
+  implicit val logoutRequestFormat: RootJsonFormat[LogoutRequest] = jsonFormat0(LogoutRequest)
+  implicit val logoutResponseFormat: RootJsonFormat[LogoutResponse] = jsonFormat0(LogoutResponse)
+  implicit val logoutAllRequestFormat: RootJsonFormat[LogoutAllRequest] = jsonFormat0(LogoutAllRequest)
+  implicit val logoutAllResponseFormat: RootJsonFormat[LogoutAllResponse] = jsonFormat0(LogoutAllResponse)
+  implicit val listAllSessionsRequestFormat: RootJsonFormat[ListAllSessionsRequest] = jsonFormat0(ListAllSessionsRequest)
+  implicit val listAllSessionsResponseFormat: RootJsonFormat[ListAllSessionsResponse] = jsonFormat1(ListAllSessionsResponse)
 }
 
 object AuthenticationRouter extends AuthorizationJsonProtocol with SprayJsonSupport {

@@ -65,8 +65,8 @@ object PostRouter extends PostJsonProtocol with SprayJsonSupport {
     },
     // todo: archive post (soft delete)
     path("post" / "delete" / Segment) {
-      postIdFromPath: String => post {
-        entity(as[DeletePostRequest])(request => withAuth("post.delete", complete(deletePost(request))))
+      postIdFromPath: String => delete {
+        withAuth("post.delete", complete(deletePost(DeletePostRequest(postIdFromPath))))
       }
     }
   )

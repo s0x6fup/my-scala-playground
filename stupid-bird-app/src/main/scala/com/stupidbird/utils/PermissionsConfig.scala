@@ -14,18 +14,19 @@ object PermissionsConfig {
     "authn.listAllSessions" -> Seq(Admin, User),
 
     // posts permissions
-    "post.create" -> Seq(Admin, User, Anonymous),
+    "post.create" -> Seq(Admin, User),
     "post.read" -> Seq(Admin, User, Anonymous),
     "post.update" -> Seq(Admin, User),
     "post.softDelete" -> Seq(Admin, User),
     "post.delete" -> Seq(Admin),
 
     // comment permissions
-    "comment.create" -> Seq(Admin, User, Anonymous),
+    // todo: once you finish creating the APi configure the right roles
+    "comment.create" -> Seq(Admin, User),
     "comment.read" -> Seq(Admin, User, Anonymous),
-    "comment.update" -> Seq(Admin, User, Anonymous),
-    "comment.softDelete" -> Seq(Admin, User, Anonymous),
-    "comment.delete" -> Seq(Admin, Anonymous),
+    "comment.update" -> Seq(Admin, User),
+    "comment.softDelete" -> Seq(Admin, User),
+    "comment.delete" -> Seq(Admin),
 
   )
 }

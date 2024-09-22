@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+
+  mysqldb:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: stupidbird-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_DATABASE=stupidbird
+      - MYSQL_USER=stupidbird_user
+      - MYSQL_PASSWORD=myverysecretpassword123!
+    ports:
+      - 3306:3306
+

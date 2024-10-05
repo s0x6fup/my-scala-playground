@@ -3,7 +3,12 @@ package com.stupidbird.playground.http
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest}
+import akka.http.scaladsl.model.{
+  ContentTypes,
+  HttpEntity,
+  HttpMethods,
+  HttpRequest
+}
 import akka.stream.ActorMaterializer
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -15,30 +20,31 @@ import spray.json._
  * https://blog.rockthejvm.com/a-5-minute-akka-http-client/
  */
 object MyHttpClient extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val system: ActorSystem = ActorSystem()
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-  import system.dispatcher
-
   def sendPocPostRequest(url: String): Future[String] = {
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
+
     val body = Map(
       "test1" -> "test1",
       "test2" -> "test2"
     ).toJson.toString
 
-    val responseFuture /* is a future similar to JS promise */ = Http().singleRequest(
-      HttpRequest(
-        method = HttpMethods.POST,
-        uri = url,
-        /*
-         * https://doc.akka.io/docs/akka-http/current/common/json-support.html
-         * creating a JSON body
-         */
-        entity = HttpEntity(
-          ContentTypes.`application/json`,
-          body
+    val responseFuture /* is a future similar to JS promise */ =
+      Http().singleRequest(
+        HttpRequest(
+          method = HttpMethods.POST,
+          uri = url,
+          /*
+           * https://doc.akka.io/docs/akka-http/current/common/json-support.html
+           * creating a JSON body
+           */
+          entity = HttpEntity(
+            ContentTypes.`application/json`,
+            body
+          )
         )
       )
-    )
 
     /*
      * handling responses can be found here

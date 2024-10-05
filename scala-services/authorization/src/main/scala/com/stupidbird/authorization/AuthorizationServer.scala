@@ -5,7 +5,7 @@ import akka.actor.typed.ActorSystem
 import scala.concurrent.ExecutionContext
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import com.stupidbird.utils.SessionService._
+import com.stupidbird.utils.SessionClient.extractUserSession
 import com.stupidbird.authorization.routers.AuthorizationRouter
 import com.stupidbird.utils.UserSession
 
@@ -14,10 +14,10 @@ object AuthorizationServer extends App {
   private val port = 9002
 
   implicit val system: ActorSystem[Any] =
-    ActorSystem(Behaviors.empty, "http-server-system")
+    ActorSystem(Behaviors.empty, "AuthorizationServer")
   implicit val executionContext: ExecutionContext = system.executionContext
 
-  private val allRouters = getUserSession { implicit callScope: UserSession =>
+  private val allRouters = extractUserSession { implicit callScope: UserSession =>
     AuthorizationRouter()
   }
 

@@ -5,11 +5,16 @@ import com.stupidbird.utils.RolesConfig._
 object PermissionsConfig {
 
   def apply(): Map[String, Seq[String]] = Map(
+    // test permissions
+    "test.anonymous" -> Seq(Anonymous),
+    "test.user" -> Seq(User),
+    "test.admin" -> Seq(Admin),
+
     // health permissions
     "health.read" -> Seq(Admin, User, Anonymous),
     
     // authentication permissions
-    "authn.register" -> Seq(Admin, User),
+    "authn.register" -> Seq(Admin, User, Anonymous),
     "authn.login" -> Seq(Admin, User, Anonymous),
     "authn.logout" -> Seq(Admin, User),
     "authn.logoutAll" -> Seq(Admin, User),

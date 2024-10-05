@@ -1,31 +1,35 @@
-package com.stupidbird.utils
+package com.stupidbird.session.controllers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directive1
 import com.stupidbird.StupidbirdService.{dbSession, executionContext}
+
 import java.time.Clock
 import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtOptions}
+
 import scala.concurrent.Future
 import java.util.UUID.randomUUID
 import akka.http.scaladsl.server.Directives._
+import com.stupidbird.utils.RolesConfig
 import scalikejdbc._
+
 import scala.util.{Failure, Success}
 import spray.json._
 
 case class UserSession(
-  userId: String,
-  sessionId: String,
-  role: String,
-  exp: Long,
-  token: String,
-)
+                        userId: String,
+                        sessionId: String,
+                        role: String,
+                        exp: Long,
+                        token: String,
+                      )
 
 case class UserSessionJwtPayload(
-  userId: String,
-  sessionId: String,
-  role: String,
-  exp: Long,
-)
+                                  userId: String,
+                                  sessionId: String,
+                                  role: String,
+                                  exp: Long,
+                                )
 
 trait SessionServiceJsonProtocol extends DefaultJsonProtocol {
   implicit val UserSessionJwtPayloadJsonFormat: RootJsonFormat[UserSessionJwtPayload] = jsonFormat4(
@@ -33,7 +37,7 @@ trait SessionServiceJsonProtocol extends DefaultJsonProtocol {
   )
 }
 
-object SessionService extends SessionServiceJsonProtocol with SprayJsonSupport {
+object SessionController extends SessionServiceJsonProtocol with SprayJsonSupport {
   val jwtSecret = "abae61da-1f87-4a4c-a2d9-d6ef2eb4a124" // tmp for development
   implicit val clock: Clock = Clock.systemUTC
   lazy val anonymousUserSession: UserSession = UserSession(
@@ -95,9 +99,9 @@ object SessionService extends SessionServiceJsonProtocol with SprayJsonSupport {
   }
 
   private def validateUserSessionNotLoggedOut(
-    userSessionJwtPayload: UserSessionJwtPayload,
-    userSessionJwt: String
-  ): UserSession = {
+                                               userSessionJwtPayload: UserSessionJwtPayload,
+                                               userSessionJwt: String
+                                             ): UserSession = {
     val doesExist: Option[Int] =
       sql"select 1 from user_session where id = ${userSessionJwtPayload.sessionId} and user_id = ${userSessionJwtPayload.userId} limit 1"
         .map(_.int(1))

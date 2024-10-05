@@ -32,13 +32,7 @@ object AuthenticationService {
       passwordIsCorrect <- isPasswordCorrect(request.password, maybeUser.getOrElse(null.asInstanceOf[User]).hash)
       userToken <- if (passwordIsCorrect) {
         val user = maybeUser.getOrElse(null.asInstanceOf[User])
-        val userSession = UserSession(
-          userId = user.id,
-          sessionId = randomUUID.toString,
-          role = user.role, // todo: derive role form table
-          exp = (System.currentTimeMillis + 14400000) / 1000 // 4 hours
-        )
-        createUserSession(userSession)
+        createUserSession(userId = user.id, userRole = user.role)
       } else Future("")
     } yield {
       LoginResponse(userToken)

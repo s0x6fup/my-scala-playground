@@ -23,6 +23,15 @@ lazy val authorization = (project in file("authorization"))
     common // the authorization projects needs the common project to compile as well
   )
 
+lazy val session = (project in file("session"))
+  .settings(
+    name := "session",
+    libraryDependencies ++= commonDependencies
+  )
+  .dependsOn(
+    common
+  )
+
 lazy val playground = (project in file("playground"))
   .settings(
     name := "playground",

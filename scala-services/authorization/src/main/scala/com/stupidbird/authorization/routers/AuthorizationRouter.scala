@@ -15,7 +15,7 @@ trait AuthorizationJsonProtocol extends DefaultJsonProtocol {
 object AuthorizationRouter extends AuthorizationJsonProtocol with SprayJsonSupport {
 
   def apply()(implicit callScope: UserSession): Route = concat(
-    path("authorization" / "is-authorized") {
+    path("authorization" / "isAuthorized") {
       post {
         entity(as[IsAuthorizedRequest])(request => complete(isAuthorized(request)))
       }

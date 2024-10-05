@@ -2,6 +2,7 @@ package com.stupidbird
 
 import scala.io.StdIn
 import akka.actor.typed.ActorSystem
+
 import scala.concurrent.ExecutionContext
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
@@ -9,12 +10,16 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Route.seal
+
 import scala.util.{Failure, Success}
 import com.stupidbird.routers._
 import com.stupidbird.utils.SessionService._
 import com.stupidbird.utils.DatabaseInitializer
+import com.stupidbird.utils.SessionClient.extractUserSession
 import scalikejdbc._
+
 import java.util.UUID.randomUUID
+
 
 object StupidbirdService extends App {
   private val host = "127.0.0.1"
@@ -30,9 +35,10 @@ object StupidbirdService extends App {
   implicit val system: ActorSystem[Any] = ActorSystem(Behaviors.empty, "http-server-system")
   implicit val executionContext: ExecutionContext = system.executionContext
 
+
   DatabaseInitializer.init()
 
-  private val allRouters = getUserSession { implicit callScope =>
+  private val allRouters = extractUserSession { implicit callScope =>
     HealthRouter() ~
     AuthenticationRouter() ~
     PostRouter() ~

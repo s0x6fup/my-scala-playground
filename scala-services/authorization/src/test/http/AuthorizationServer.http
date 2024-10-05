@@ -1,0 +1,8 @@
+### GET request to example server
+POST http://localhost:9002/authorization/is-authorized
+content-type: application/json
+
+{
+  "permission": "test.user"
+}
+###

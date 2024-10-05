@@ -6,7 +6,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes.Unauthorized
 import com.stupidbird.services.HealthService._
 import com.stupidbird.utils.UserSession
-import com.stupidbird.utils.AuthorizationClient.withAuth
+import com.stupidbird.StupidbirdService.{executionContext, system}
+import com.stupidbird.utils.AuthorizationClient.{withAuth, withAuthV2}
 import spray.json._
 import scalikejdbc._
 
@@ -16,15 +17,16 @@ trait HealthJsonProtocol extends DefaultJsonProtocol {
 }
 
 object HealthRouter extends HealthJsonProtocol with SprayJsonSupport {
+
   def apply()(implicit callScope: UserSession): Route =
     (path("health") & get) {
-      withAuth("health.read", complete(IsHealthy()))
+      println(s"[+] DEBUG: $callScope")
+      withAuthV2("health.read", complete(IsHealthy()))
     }
 }
 
 case class HealthRequest()
 
 case class HealthResponse(
-                           status: String
-                         )
-
+  status: String
+)

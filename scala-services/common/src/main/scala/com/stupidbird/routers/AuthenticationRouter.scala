@@ -1,5 +1,6 @@
 package com.stupidbird.routers
 
+import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
@@ -7,8 +8,10 @@ import akka.http.scaladsl.model.StatusCodes.{NoContent, Unauthorized}
 import akka.http.scaladsl.model.headers.HttpCookie
 import com.stupidbird.services.AuthenticationService._
 import com.stupidbird.utils.UserSession
-import com.stupidbird.utils.AuthorizationClient.withAuth
+import com.stupidbird.utils.AuthorizationClient.withAuthV2
 import spray.json._
+
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 trait AuthenticationJsonProtocol extends DefaultJsonProtocol {
@@ -25,10 +28,10 @@ trait AuthenticationJsonProtocol extends DefaultJsonProtocol {
 }
 
 object AuthenticationRouter extends AuthenticationJsonProtocol with SprayJsonSupport {
-  def apply()(implicit callScope: UserSession): Route = concat(
+  def apply()(implicit callScope: UserSession, executionContext: ExecutionContext, system: ActorSystem[Any]): Route = concat(
     path("auth" / "register") {
       post {
-        entity(as[RegisterRequest])(request => withAuth("authn.register", complete(register(request))))
+        entity(as[RegisterRequest])(request => withAuthV2("authn.register", complete(register(request))))
       }
     },
     // todo: move all logic to the controller so i can add a permissions here
@@ -47,17 +50,17 @@ object AuthenticationRouter extends AuthenticationJsonProtocol with SprayJsonSup
     },
     path("auth" / "logout") {
       post {
-        entity(as[LogoutRequest])(request => withAuth("authn.logout", complete(logout(request))))
+        entity(as[LogoutRequest])(request => withAuthV2("authn.logout", complete(logout(request))))
       }
     },
     path("auth" / "logoutAll") {
       post {
-        entity(as[LogoutAllRequest])(request => withAuth("authn.logoutAll", complete(logoutAll(request))))
+        entity(as[LogoutAllRequest])(request => withAuthV2("authn.logoutAll", complete(logoutAll(request))))
       }
     },
     path("auth" / "listAllSessions") {
       get {
-        withAuth("authn.listAllSessions", complete(listAllSessions(ListAllSessionsRequest())))
+        withAuthV2("authn.listAllSessions", complete(listAllSessions(ListAllSessionsRequest())))
       }
     },
     // archive user (soft delete)
